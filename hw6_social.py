@@ -82,7 +82,7 @@ def parseState(fromString):
     fromString = fromString[:end]
     fromString = fromString.strip()
         
-    print(fromString)
+    # print(fromString)
     return fromString
     
 
@@ -94,28 +94,24 @@ Parameters: str
 Returns: list of strs
 '''
 def findHashtags(message):
-    hashtags=[]
-    words=[]
-    new=[]
-    chars =  "[@_!$%^&*`;+=(.,)<->?/\|}'{~:]"
-
-    for i in chars:
-        if i in message:
-           message=  message.replace(i," ")
-    words= message.split()
-    # print(message)
-
-    for i in range(len(words)):
-        if words[i][0]=="#":
-     #main code ends here
-            if words[i].count("#")>1:
-               new=words[i].split("#",2)
-               #print(new)
-               for j in range(1,len(new)):
-                  new[j]="#"+new[j]
-                  hashtags.append(new[j])
-            else: hashtags.append(words[i])
-    # print(hashtags)
+    hashtags=[]  
+    hashtag="#"
+    list2=[]
+    list=message.split("#")
+    for i in range(1,len(list)):
+        list2.append(list[i])
+    #print(list2)
+    for word in list2:
+       # print(word)
+        for char in word:
+            if char in endChars:
+                #hello=i.split(k)  
+                break
+            else: 
+                hashtag+=char      
+       # print(hello)
+        hashtags.append(hashtag)
+        hashtag="#"
     return hashtags
 
 
@@ -129,7 +125,9 @@ Parameters: dataframe ; str
 Returns: str
 '''
 def getRegionFromState(stateDf, state):
-    return
+    locn= stateDf.loc[stateDf['state'] == state, 'region'] 
+    return locn.values[0]
+
 
 
 '''
@@ -139,6 +137,30 @@ Parameters: dataframe ; dataframe
 Returns: None
 '''
 def addColumns(data, stateDf):
+    names=[]
+    positions=[]
+    states=[] 
+    regions=[]
+    hashtags=[]
+    for  index, row in data.iterrows():
+        value=row['label']
+        name=parseName(value)
+        position=parsePosition(value)
+        state=parseState(value)
+        region=getRegionFromState(stateDf,state)
+        text=row['text']
+        hashtag=findHashtags(text)
+
+        names.append(name)
+        positions.append(position)
+        states.append(state)
+        regions.append(region)
+        hashtags.append(hashtag)
+    data['name']=names
+    data['position']=positions
+    data['state']=states
+    data['region']=regions
+    data['hashtags']=hashtags
     return
 
 
@@ -152,7 +174,12 @@ Returns: str
 '''
 def findSentiment(classifier, message):
     score = classifier.polarity_scores(message)['compound']
-    return
+    if score<-0.1:
+        return "negative"
+    elif score >0.1:
+        return "positive"
+    else: return "neutral"
+  
 
 
 '''
@@ -163,7 +190,15 @@ Returns: None
 '''
 def addSentimentColumn(data):
     classifier = SentimentIntensityAnalyzer()
+    sentiment=[]
+    for  index, row in data.iterrows():
+        text=row['text']
+        senti=findSentiment(classifier, text)
+        sentiment.append(senti)
+    data['sentiment']=sentiment
     return
+    
+
 
 
 '''
@@ -173,7 +208,25 @@ Parameters: dataframe ; str ; str
 Returns: dict mapping strs to ints
 '''
 def getDataCountByState(data, colName, dataToCount):
-    return
+    stateDict={}
+    if(colName=="" and dataToCount==""):
+         for  index, row in data.iterrows():
+            if row['state'] in stateDict:
+                    stateDict[row['state']]=stateDict[row['state']]+1
+            else:
+                    stateDict[row['state']]=1
+    else:
+        for  index, row in data.iterrows():
+            if row[colName]==dataToCount:
+                if row['state'] in stateDict:
+                    stateDict[row['state']]=stateDict[row['state']]+1
+                else:
+                    stateDict[row['state']]=1
+
+   # print(stateDict)  
+
+    return stateDict
+
 
 
 '''
@@ -183,7 +236,17 @@ Parameters: dataframe ; str
 Returns: dict mapping strs to (dicts mapping strs to ints)
 '''
 def getDataForRegion(data, colName):
-    return
+    outerDict={}
+    for  index, row in data.iterrows():
+        if row['region'] not in outerDict:
+           outerDict[row['region']]={}
+        if row[colName] not in  outerDict[row['region']]:
+            outerDict[row['region']][row[colName]]=0
+        outerDict[row['region']][row[colName]]+=1
+    return outerDict
+
+    
+   
 
 
 '''
@@ -193,7 +256,18 @@ Parameters: dataframe
 Returns: dict mapping strs to ints
 '''
 def getHashtagRates(data):
-    return
+    HashDict = {}
+    for  index, row in data.iterrows():
+        h=findHashtags(row["text"])
+        for i in h:
+            if i  in HashDict:
+               HashDict[i]+=1
+            else:
+               HashDict[i]=1
+    print (index)            
+    print (HashDict)             
+    print (len (HashDict))              
+    return HashDict
 
 
 '''
@@ -320,16 +394,28 @@ if __name__ == "__main__":
     # test.week1Tests()
     # print("\n" + "#"*15 + " WEEK 1 OUTPUT " + "#" * 15 + "\n")
     # test.runWeek1()
-    test.testMakeDataFrame()
-    test.testParseName()
-    test.testParsePosition()
-    test.testParseState()
+    # test.testMakeDataFrame()
+    # test.testParseName()
+    # test.testParsePosition()
+    # test.testParseState()
     test.testFindHashtags()
+    # test.testGetRegionFromState()
+    # test.testAddColumns()
+    # test.testFindSentiment()
+    # test.testAddSentimentColumn()
+    # df = makeDataFrame("data/politicaldata.csv")
+    # stateDf = makeDataFrame("data/statemappings.csv")
+    # addColumns(df, stateDf)
+    # addSentimentColumn(df)
+
+    # test.testGetDataCountByState(df)
+    # test.testGetDataForRegion(df)
+    # test.testGetHashtagRates(df)
     # ## Uncomment these for Week 2 ##
-    # """print("\n" + "#"*15 + " WEEK 2 TESTS " +  "#" * 16 + "\n")
-    # test.week2Tests()
-    # print("\n" + "#"*15 + " WEEK 2 OUTPUT " + "#" * 15 + "\n")
-    # test.runWeek2()"""
+    """print("\n" + "#"*15 + " WEEK 2 TESTS " +  "#" * 16 + "\n")
+    test.week2Tests()
+    print("\n" + "#"*15 + " WEEK 2 OUTPUT " + "#" * 15 + "\n")
+    test.runWeek2()"""
 
     # ## Uncomment these for Week 3 ##
     # """print("\n" + "#"*15 + " WEEK 3 OUTPUT " + "#" * 15 + "\n")
