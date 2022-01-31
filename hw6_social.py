@@ -25,7 +25,9 @@ Parameters: str
 Returns: dataframe
 '''
 def makeDataFrame(filename):
-    return
+    df = pd.read_csv(filename)
+
+    return df
 
 
 '''
@@ -35,7 +37,16 @@ Parameters: str
 Returns: str
 '''
 def parseName(fromString):
-    return
+    start = fromString.find("From") + \
+    len("From: ")
+    fromString = fromString[start:]
+    end = fromString.find(" (")
+    fromString = fromString[:end]
+    fromString = fromString.strip()
+        
+    #print(fromString)
+    return fromString
+    
 
 
 '''
@@ -45,7 +56,16 @@ Parameters: str
 Returns: str
 '''
 def parsePosition(fromString):
-    return
+    start = fromString.find("(") + \
+    len("(")
+    fromString = fromString[start:]
+    end = fromString.find(" from")
+    fromString = fromString[:end]
+    fromString = fromString.strip()
+        
+    # print(fromString)
+    return fromString
+
 
 
 '''
@@ -55,7 +75,16 @@ Parameters: str
 Returns: str
 '''
 def parseState(fromString):
-    return
+    start = fromString.find("from") + \
+    len("from")
+    fromString = fromString[start:]
+    end = fromString.find(")")
+    fromString = fromString[:end]
+    fromString = fromString.strip()
+        
+    print(fromString)
+    return fromString
+    
 
 
 '''
@@ -65,7 +94,32 @@ Parameters: str
 Returns: list of strs
 '''
 def findHashtags(message):
-    return
+    hashtags=[]
+    words=[]
+    new=[]
+    chars =  "[@_!$%^&*`;+=(.,)<->?/\|}'{~:]"
+
+    for i in chars:
+        if i in message:
+           message=  message.replace(i," ")
+    words= message.split()
+    # print(message)
+
+    for i in range(len(words)):
+        if words[i][0]=="#":
+     #main code ends here
+            if words[i].count("#")>1:
+               new=words[i].split("#",2)
+               #print(new)
+               for j in range(1,len(new)):
+                  new[j]="#"+new[j]
+                  hashtags.append(new[j])
+            else: hashtags.append(words[i])
+    # print(hashtags)
+    return hashtags
+
+
+   
 
 
 '''
@@ -75,7 +129,9 @@ Parameters: dataframe ; str
 Returns: str
 '''
 def getRegionFromState(stateDf, state):
-    return
+   locn= stateDf.loc[stateDf['state'] == state, 'region'] 
+   return locn.values[0]
+
 
 
 '''
@@ -262,17 +318,22 @@ def scatterPlot(xValues, yValues, labels, title):
 
 # This code runs the test cases to check your work
 if __name__ == "__main__":
-    print("\n" + "#"*15 + " WEEK 1 TESTS " +  "#" * 16 + "\n")
-    test.week1Tests()
-    print("\n" + "#"*15 + " WEEK 1 OUTPUT " + "#" * 15 + "\n")
-    test.runWeek1()
+    # print("\n" + "#"*15 + " WEEK 1 TESTS " +  "#" * 16 + "\n")
+    # test.week1Tests()
+    # print("\n" + "#"*15 + " WEEK 1 OUTPUT " + "#" * 15 + "\n")
+    # test.runWeek1()
+    test.testMakeDataFrame()
+    test.testParseName()
+    test.testParsePosition()
+    test.testParseState()
+    test.testFindHashtags()
+    test.testGetRegionFromState()
+    # ## Uncomment these for Week 2 ##
+    # """print("\n" + "#"*15 + " WEEK 2 TESTS " +  "#" * 16 + "\n")
+    # test.week2Tests()
+    # print("\n" + "#"*15 + " WEEK 2 OUTPUT " + "#" * 15 + "\n")
+    # test.runWeek2()"""
 
-    ## Uncomment these for Week 2 ##
-    """print("\n" + "#"*15 + " WEEK 2 TESTS " +  "#" * 16 + "\n")
-    test.week2Tests()
-    print("\n" + "#"*15 + " WEEK 2 OUTPUT " + "#" * 15 + "\n")
-    test.runWeek2()"""
-
-    ## Uncomment these for Week 3 ##
-    """print("\n" + "#"*15 + " WEEK 3 OUTPUT " + "#" * 15 + "\n")
-    test.runWeek3()"""
+    # ## Uncomment these for Week 3 ##
+    # """print("\n" + "#"*15 + " WEEK 3 OUTPUT " + "#" * 15 + "\n")
+    # test.runWeek3()"""
